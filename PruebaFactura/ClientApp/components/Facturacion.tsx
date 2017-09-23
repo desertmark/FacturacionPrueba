@@ -2,28 +2,71 @@ import * as React from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { ApplicationState }  from '../store';
-import * as CounterStore from '../store/Counter';
-import * as WeatherForecasts from '../store/WeatherForecasts';
+import * as FacturaReporte from './Reportes/Factura'
 
-type CounterProps =
-    CounterStore.CounterState
-    & typeof CounterStore.actionCreators
-    & RouteComponentProps<{}>;
+class Facturacion extends React.Component<any, {}> 
+{ 
+    constructor(props) {
+        super(props);
+        this.imprimir = this.imprimir.bind(this);
+        this.getLines = this.getLines.bind(this);
+    }
+    getLines(cant) {
 
-class Counter extends React.Component<CounterProps, {}> {
+        let lines = [];
+        for (var i = 0; i < cant; i++) {
+            let precio = ((Math.random() * 300) + 1);
+            lines.push({
+                cant: 1,
+                descripcion: 'ANIMALES DE GRANJA/MIS',
+                edicionId: 1,
+                precioTapa: precio.toFixed(2),
+                precioVta: (precio * 1.2).toFixed(2)
+            });
+        }
+        return lines;
+    }
+    imprimir() {
+        let factura: FacturaReporte.IFactura = {
+            ClienteInfo: {
+                numero: '006-00014971',
+                domicilio: 'AVDA RIVADAVIA 7284',
+                cliente: 'RODRIGUEZ HUGO ALEJANDRO',
+                cuit: 20125144463,
+                condicionVta: 'CONTADO',
+                iva:'Responsable Monotributo'
+            },
+            ProveedorInfo: {
+                razonSocial: 'COOP. DE TRAB.DIAR/REV PARQUE LTDA.',
+                domicilio: 'AV AUSTRALIA 2886-C1296ABL - BARRACAS',
+                iva: 'IVA Responsable Inscripto',
+                cuit: '30709161683',
+                inicioAct: '01/09/2012',
+            },
+            CargaNoElegible: {
+                Lineas: this.getLines(80),
+            },
+            VencimientoCargaNoElegible: {
+                Subtotal: '63.650',
+                Lineas: this.getLines(3)                
+            }            
+        }
+
+        FacturaReporte.ImprimirFactura(factura);
+    }
+
     public render() {
         return <div>
             <h1>Facturacion</h1>
 
             <p>Prueba de facturacion con PDFMake</p>
 
-            <button onClick={() => alert('Imprimiendo Facturas')}>Imprimir Facturas</button>
+            <button onClick={this.imprimir}>Imprimir Facturas</button>
         </div>;
     }
 }
 
 
-export default connect(
-    (state: ApplicationState) => state.counter, 
-    CounterStore.actionCreators                 
-)(Counter) as typeof Counter;
+export default connect(               
+)(Facturacion) as typeof Facturacion;
+
